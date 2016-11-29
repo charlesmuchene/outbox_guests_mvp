@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -106,7 +107,15 @@ public class MainActivity extends AppCompatActivity {
      */
     private void addNameToListAndPersist() {
 
-        String name = nameEditText.getText().toString();
+        String name = nameEditText.getText().toString().trim();
+
+        if (TextUtils.isEmpty(name)) {
+
+            Toast.makeText(this, "We don't invite ghost guests", Toast.LENGTH_SHORT).show();
+
+            return;
+
+        }
 
         namesSet.add(name);
 
