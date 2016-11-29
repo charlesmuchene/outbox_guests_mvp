@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Guests</string>
+    <string name="title">Guests at Outbox</string>
     <string name="enter_your_name">Enter your name</string>
     <string name="submit">Submit</string>
     <string name="list_of_our_guests">List of our Guests</string>
+    <string name="clear">Clear</string>
 </resources>
