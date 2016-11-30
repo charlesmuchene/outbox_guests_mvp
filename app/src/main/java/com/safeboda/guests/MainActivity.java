@@ -1,12 +1,11 @@
 package com.safeboda.guests;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,119 +13,84 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
-
-import java.util.HashSet;
+import com.safeboda.guests.guest.GuestContract;
+import com.safeboda.guests.guest.GuestPresenter;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GuestContract.View {
 
-    private static final String NAMES_KEY = "guest_list";
-    private Set<String> namesSet;
-    private SharedPreferences preferences;
-    private TextInputEditText nameEditText;
-    private ArrayAdapter<String> namesAdapter;
+  private TextInputEditText nameEditText;
+  private ArrayAdapter<String> namesAdapter;
+  private GuestPresenter guestPresenter;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+  @Override protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate(savedInstanceState);
+    super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+    setContentView(R.layout.activity_main);
+    guestPresenter = Injection.provideGuestPresenter(this, Injection.provideGuestRepository(this));
+    guestPresenter.start();
+    guestPresenter.loadGuestList();
+  }
 
-        namesSet = new HashSet<>();
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    getMenuInflater().inflate(R.menu.menu_home, menu);
 
-        /* UI work */
+    return true;
+  }
 
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
 
-        ListView listView = (ListView) findViewById(R.id.name_list_view);
+    switch (item.getItemId()) {
 
-        Button submitButton = (Button) findViewById(R.id.submit_button);
+      case R.id.clear_menu:
+        guestPresenter.deleteGuestList();
 
-        nameEditText = (TextInputEditText) findViewById(R.id.name_edit_text);
-
-        namesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
-
-        /* Logic */
-
-        listView.setAdapter(namesAdapter);
-
-        submitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                addNameToListAndPersist();
-
-            }
-        });
-
-        if (preferences.contains(NAMES_KEY)) {
-
-            namesSet = preferences.getStringSet(NAMES_KEY, new HashSet<String>());
-
-            if (!namesSet.isEmpty()) namesAdapter.addAll(namesSet);
-
-        }
+        break;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    return true;
+  }
 
-        getMenuInflater().inflate(R.menu.menu_home, menu);
+  @Override public void init() {
+    setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
-        return true;
-    }
+    ListView listView = (ListView) findViewById(R.id.name_list_view);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    Button submitButton = (Button) findViewById(R.id.submit_button);
 
-        switch (item.getItemId()) {
+    nameEditText = (TextInputEditText) findViewById(R.id.name_edit_text);
 
-            case R.id.clear_menu:
+    namesAdapter =
+        new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
 
-                nameEditText.setText("");
+    listView.setAdapter(namesAdapter);
 
-                namesSet.clear();
-
-                namesAdapter.clear();
-
-                preferences.edit().clear().apply();
-
-                Toast.makeText(this, "All names cleared!", Toast.LENGTH_SHORT).show();
-
-                break;
-        }
-
-        return true;
-    }
-
-    /**
-     * Add names to the list and persist it
-     */
-    private void addNameToListAndPersist() {
-
+    submitButton.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View view) {
         String name = nameEditText.getText().toString().trim();
+        guestPresenter.saveGuest(name);
+      }
+    });
+  }
 
-        if (TextUtils.isEmpty(name)) {
+  @Override public void addGuest(@NonNull String name) {
+    namesAdapter.add(name);
+    nameEditText.setText("");
+    Toast.makeText(this, String.format("%s added to the list", name), Toast.LENGTH_SHORT).show();
+  }
 
-            Toast.makeText(this, "We don't invite ghost guests", Toast.LENGTH_SHORT).show();
+  @Override public void displayAllGuest(@NonNull Set<String> guestList) {
+    namesAdapter.addAll(guestList);
+  }
 
-            return;
+  @Override public void clearGuestList() {
+    namesAdapter.clear();
+    Toast.makeText(this, "All names cleared!", Toast.LENGTH_SHORT).show();
+  }
 
-        }
-
-        namesSet.add(name);
-
-        namesAdapter.add(name);
-
-        nameEditText.setText("");
-
-        preferences.edit().putStringSet(NAMES_KEY, namesSet).apply();
-
-        Toast.makeText(this, String.format("%s added to the list", name), Toast.LENGTH_SHORT).show();
-
-    } // addNameToListAndPersist
-
+  @Override public void showMessage(@StringRes int messageId) {
+    Toast.makeText(this, messageId, Toast.LENGTH_SHORT).show();
+  }
 }

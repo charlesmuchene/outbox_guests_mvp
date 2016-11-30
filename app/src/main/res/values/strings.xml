@@ -5,4 +5,5 @@
     <string name="submit">Submit</string>
     <string name="list_of_our_guests">List of our Guests</string>
     <string name="clear">Clear</string>
+    <string name="error_empty_name">You can\'t add a ghost guest</string>
 </resources>
