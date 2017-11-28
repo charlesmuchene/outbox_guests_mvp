@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
@@ -13,10 +13,10 @@ import static org.mockito.Mockito.verify;
 public class GuestPresenterTest {
 
     @Mock
-    GuestContract.View guestView;
+    private GuestContract.View guestView;
 
     @Mock
-    GuestRepository guestRepository;
+    private GuestRepository guestRepository;
 
     private GuestPresenter guestPresenter;
 
@@ -40,8 +40,6 @@ public class GuestPresenterTest {
     public void saveGuest() {
 
         guestPresenter.saveGuest("name");
-
-        /*when(TextUtils.isEmpty(anyString())).thenReturn(true);*/
 
         verify(guestView).showMessage(anyInt());
 
