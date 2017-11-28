@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements GuestContract.Vie
 
   private TextInputEditText nameEditText;
   private ArrayAdapter<String> namesAdapter;
-  private GuestPresenter guestPresenter;
+  private GuestContract.Presenter guestPresenter;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
 
